@@ -1,0 +1,147 @@
+---
+title: "CSDA1050 Capstone Project"
+author: "Eugene Yong Geun Park"
+date: '2019-07-17'
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+
+```{r}
+library(ggplot2)
+library(plotly)
+library(highcharter)
+```
+
+
+```{r}
+#importing files I will work with
+hr<-read.csv("~/Desktop/CSDA-1050F18S1/eugenepark/CSDA1050HR.csv")
+fi<-read.csv("~/Desktop/CSDA-1050F18S1/eugenepark/CSDA1050FI.csv")
+```
+
+
+```{r}
+#Examine the HR dataset
+summary(hr)
+```
+```{r}
+head(hr)
+```
+
+```{r}
+str(hr)
+```
+
+```{r}
+ggplot(hr, aes(x=Term..Type, fill=C.LEVEL))+
+  geom_bar()
+```
+
+```{r}
+ggplot(hr, aes(x=Term..Type, fill=Team))+
+  geom_bar()
+```
+
+```{r}
+ggplot(hr, aes(x=H.Year, fill=Team))+
+  geom_bar()
+```
+
+```{r}
+hdate <- as.character(hr$Hire)
+tdate <- as.character(hr$Termination)
+bdate <- as.character(hr$DOB)
+hr$hdate = as.Date(hdate, format="%Y%m%d")
+hr$tdate = as.Date(tdate, format="%Y%m%d")
+hr$bdate = as.Date(bdate, format="%Y%m%d")
+head(hr)
+```
+
+```{r}
+hr$hireage <- as.integer(round((hr$hdate-hr$bdate)/365, digit=0))
+hr$termage <- as.integer(round((hr$tdate-hr$bdate)/365, digit=0))
+head(hr)
+```
+
+```{r}
+ggplot(hr, aes(x=hireage, fill=C.LEVEL))+
+  geom_bar()
+```
+
+```{r}
+ggplot(hr, aes(x=termage, fill=Term..Type))+
+  geom_bar()
+```
+
+```{r}
+hr$tenure <- as.integer(round((hr$tdate-hr$hdate)/365, digit=0))
+```
+
+```{r}
+ggplot(hr, aes(x=Term..Type, fill=as.factor(tenure)))+
+  geom_bar()
+```
+
+```{r}
+ggplot(hr, aes(x=Term..Type, fill=Education))+
+  geom_bar()
+
+
+
+```
+
+```{r}
+ggplot(hr, aes(x=Term..Type, fill=SEX))+
+  geom_bar()
+```
+
+```{r}
+ggplot(hr, aes(x=Term..Type, fill=Raise))+
+  geom_bar()
+```
+
+```{r}
+ggplot(hr, aes(x=Education, fill=Education))+
+  geom_bar()+
+  facet_wrap(~Term..Type)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+```{r}
+ggplot(hr, aes(x=Team, fill=Team))+
+  geom_bar()+
+  facet_wrap(~Term..Type)+
+  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+
+```
+
+```{r}
+p<-ggplot(hr, aes(x=Raise, fill=Raise))+
+  geom_bar()+
+  facet_wrap(~Term..Type)
+
+```
+
+
+```{r}
+ggplotly(p)
+
+```
+
+hcarht```
+```{r}
+plot_ly(hr, y=hr$tenure, color=hr$Team, type="box")
+
+```
+
+```{r}
+hchart(hr, "scatter", hcaes(x=as.integer(BEGIN.SALARY), y=tenure, group=Team))
+```
