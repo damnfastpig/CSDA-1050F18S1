@@ -3,6 +3,7 @@ title: "CSDA1050 Capstone Project"
 author: "Eugene Yong Geun Park"
 date: '2019-07-17'
 output:
+  word_document: default
   pdf_document: default
   html_document: default
 ---
@@ -12,27 +13,39 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## Background
+### As my proposal suggests, this project focuses on this company's past 10-year employee data to discover patterns in employment. 
+
+## Data Exploration
+### First starting with HR data which consists of employees' personal information and employment information. 
 
 ```{r}
 library(ggplot2)
 library(plotly)
 library(highcharter)
+library(dplyr)
 ```
 
 
 ```{r}
 #importing files I will work with
 hr<-read.csv("~/Desktop/CSDA-1050F18S1/eugenepark/CSDA1050HR.csv")
-fi<-read.csv("~/Desktop/CSDA-1050F18S1/eugenepark/CSDA1050FI.csv")
 ```
 
 
 ```{r}
 #Examine the HR dataset
-summary(hr)
-```
-```{r}
+#S.EMP. - A unique employee number assigned to each employee
+#C.LEVEL - Employee's job level ranging from C1 being lowest & C6 highest
+#Team - This company consists of 5 different teams/department
+#Raise - # of raises received 
+#Term..Type - Among employees who left, voluntary leaves are shown as "Quit" & involuntary leaves as "Terminated". Active employees are left blank. 
+#Dist..To.work - Distance to work from home in km
+#I believe the rest are pretty self explantory
 head(hr)
+```
+
+```{r}
+summary(hr)
 ```
 
 ```{r}
@@ -40,21 +53,42 @@ str(hr)
 ```
 
 ```{r}
-ggplot(hr, aes(x=Term..Type, fill=C.LEVEL))+
+#Plotting a bar chart to see if there's a particular group of job level that stands out
+#Please note that I am using Plotly library to take advantage of its interactive functionality (i.e. hover-over data display, etc)
+#While each level can be considered as 2-3 years experience accumulatively, C2 & C3 level seem to be harder to be retained (most "Quit"" job levels)
+#Among employees terminated, again C2 & C3 level take up more than 50%. I also think it's interesting that C5 level takes sizable portion in "terminated" group.
+a<-ggplot(hr, aes(x=TermType, fill=C.LEVEL))+
   geom_bar()
+ggplotly(a)
 ```
 
 ```{r}
-ggplot(hr, aes(x=Term..Type, fill=Team))+
-  geom_bar()
+#C5 level has avg. 158K salary which is a significant investment from Employer's perspective. Then the fact they are one of the biggest groups who get "terminated" (not quit) by the company may suggests that there is an issue with hiring process.   
+aggregate(hr$BEGIN.SALARY, by=list(hr$C.LEVEL), FUN=mean)
+
 ```
 
+
+
 ```{r}
+#Checking out the same employee status by department. 
+#Account and Creative teams are advertising's bread and butter type of roles. 
+#We seem to have more difficulty retaining Account team. Quit > Terminated
+#While retention is still problematic with Creative (Quit 23), it is the department where we are having most problem hiring the right resource (Terminated 11) 
+b <-ggplot(hr, aes(x=TermType, fill=Team))+
+  geom_bar()
+ggplotly(b)
+```
+
+
+```{r}
+#Checking # of hires by year and department. There must be a reason why # of hires jumped so greatly after 2011. This also shows that we are in constant need for Account and Creative Services then Planning and Production needs have grown after 2010. 
 ggplot(hr, aes(x=H.Year, fill=Team))+
   geom_bar()
 ```
 
 ```{r}
+#Changing HireDate, TerminationDate and BirthDate to Date format for further data manipulation. 
 hdate <- as.character(hr$Hire)
 tdate <- as.character(hr$Termination)
 bdate <- as.character(hr$DOB)
@@ -65,83 +99,124 @@ head(hr)
 ```
 
 ```{r}
+#Figuring out each employee's Age at hire and Age at termination. 
 hr$hireage <- as.integer(round((hr$hdate-hr$bdate)/365, digit=0))
 hr$termage <- as.integer(round((hr$tdate-hr$bdate)/365, digit=0))
 head(hr)
 ```
 
 ```{r}
-ggplot(hr, aes(x=hireage, fill=C.LEVEL))+
+#Plotting a graph to see if this company is more appealing to certain age group as a career opportunity. We seem to have more new hires in younger or equal to 30 group. 
+d<-ggplot(hr, aes(x=hireage))+
+  geom_bar()
+ggplotly(d)
+```
+
+```{r}
+#Checking in what age people leave the company the most. Please note that active 17 employees are not included in this plot. It is most motable around 30. Please note that this does not differentiate "Quit" and "Terminated" status. Further analysis is required. 
+ggplot(hr, aes(x=termage))+
   geom_bar()
 ```
 
 ```{r}
-ggplot(hr, aes(x=termage, fill=Term..Type))+
-  geom_bar()
+# Two charts that differentiate Quit and Terminiated. 
+hr %>% filter(TermType=="Quit" | TermType=="Terminated")%>%
+ggplot(., aes(x=termage))+
+  geom_bar()+
+  facet_wrap(~TermType)
+
 ```
 
+
+
+
 ```{r}
+#Figuring out number of years employees stayed in the company. 
 hr$tenure <- as.integer(round((hr$tdate-hr$hdate)/365, digit=0))
 ```
 
 ```{r}
-ggplot(hr, aes(x=Term..Type, fill=as.factor(tenure)))+
+#Maybe employees would feel that they have had enough and start looking after certain number of years. Also employer could scrutinize employee's performance for a certain period, then maybe the level of scrutiny gets reduced. Below plot suggests that change in staff mostly happens within 1st 3 years.  
+e<-ggplot(hr, aes(x=TermType, fill=as.factor(tenure)))+
   geom_bar()
+ggplotly(e)
+```
+
+
+```{r}
+#Plot by gender. I don't believe this provides much insight. Might be an good illustration of gender equality at workplace. 
+g<-ggplot(hr, aes(x=TermType, fill=SEX))+
+  geom_bar()
+ggplotly(g)
 ```
 
 ```{r}
-ggplot(hr, aes(x=Term..Type, fill=Education))+
+#Although this analysis is mostly based on employee's personal(objective), # of raises received throughout the tenure is one subjective factor that can illustrate employee's performance. 
+#While it is obvious that employees without getting recognition (0 raise) are prone to retention risk (both voluntarily and involuntarily), the analysis could further develop with employees with 1 or more raises. 
+h<-ggplot(hr, aes(x=TermType, fill=Raise))+
   geom_bar()
 
-
-
+ggplotly(h)
 ```
 
 ```{r}
-ggplot(hr, aes(x=Term..Type, fill=SEX))+
-  geom_bar()
+#Plot created to find correlation between employees' Distance to work and Tenure.
+
+ggplotly(ggplot(hr, aes(x=tenure, y=DistToWork))+
+  geom_jitter())
 ```
 
-```{r}
-ggplot(hr, aes(x=Term..Type, fill=Raise))+
-  geom_bar()
-```
 
 ```{r}
-ggplot(hr, aes(x=Education, fill=Education))+
-  geom_bar()+
-  facet_wrap(~Term..Type)+
-  theme(axis.text.x = element_text(angle = 90, hjust = 1))
+#Now some relationship between some variables and employee retention has been explored, I would also like to explore some other visualization tools for stakeholders. 
 
-```
-
-```{r}
+# Below is explored in the beginning but testing it in a different format to determine what is easier to understand. 
 ggplot(hr, aes(x=Team, fill=Team))+
   geom_bar()+
-  facet_wrap(~Term..Type)+
+  facet_wrap(~TermType)+
   theme(axis.text.x = element_text(angle = 90, hjust = 1))
 
 ```
 
 ```{r}
+#Same exercise as above. Exploring different format.
 p<-ggplot(hr, aes(x=Raise, fill=Raise))+
   geom_bar()+
-  facet_wrap(~Term..Type)
-
-```
-
-
-```{r}
+  facet_wrap(~TermType)
 ggplotly(p)
 
 ```
 
-hcarht```
+
 ```{r}
+#Exploring HighCharter library for better visualization of analysis, in additioned to enhanced information delivery. 
 plot_ly(hr, y=hr$tenure, color=hr$Team, type="box")
 
 ```
 
 ```{r}
+#Exploring HighCharter library for better visualization of analysis part 2
 hchart(hr, "scatter", hcaes(x=as.integer(BEGIN.SALARY), y=tenure, group=Team))
 ```
+
+```{r}
+#A different sample utilizing collapsibleTree to add interactive function. Might be beneficial when making a presentation. 
+library(collapsibleTree)
+
+hr %>%
+  group_by(Team, Education) %>%
+  summarize('TeamNum' = n())%>%
+  collapsibleTreeSummary(hr, 
+    hierarchy = c("Team", "Education"),
+    root = "HR",
+    width = 800,
+    attribute = "TeamNum",
+    collapsed = F, 
+    linkLength = 200
+  )
+```
+
+##Next Step
+###1. I believe there is some trend that can be discovered intuitively by observing data visualization. I'd like to invest some more time in developing something that can deliver information more efficiently. 
+###2. In addition to above, I will explore a several machine learning algorithms to test if they can provide predictive power. 
+###3. I also have company's financial data which demonstrates company's financial performance year-over-year. It will be interesting to see how its financial history reenacts with HR history. 
