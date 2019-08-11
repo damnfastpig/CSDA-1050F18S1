@@ -132,7 +132,13 @@ ggplot(., aes(x=termage))+
 
 ```{r}
 #Figuring out number of years employees stayed in the company. 
-hr$tenure <- as.integer(round((hr$tdate-hr$hdate)/365, digit=0))
+#If an employee is terminated, tenure is calculated from HireDate and TermincationDate. If an employee is not terminated, tenure is calculated from HireDate and CurrentDate
+hr$current <-as.Date(Sys.Date())
+hr$tenure <- ifelse(is.na(hr$termage), as.integer(round((hr$current-hr$hdate)/365, digit=0))
+                    ,as.integer(round((hr$tdate-hr$hdate)/365, digit=0)))
+##hr$tenure <- as.integer(round((hr$tdate-hr$hdate)/365, digit=0))
+
+##hr$tenure[is.na(hr$tenure)] <- as.integer(round((hr$current-hr$hdate)/365, digit=0))
 ```
 
 ```{r}
@@ -220,3 +226,18 @@ hr %>%
 ###1. I believe there is some trend that can be discovered intuitively by observing data visualization. I'd like to invest some more time in developing something that can deliver information more efficiently. 
 ###2. In addition to above, I will explore a several machine learning algorithms to test if they can provide predictive power. 
 ###3. I also have company's financial data which demonstrates company's financial performance year-over-year. It will be interesting to see how its financial history reenacts with HR history. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

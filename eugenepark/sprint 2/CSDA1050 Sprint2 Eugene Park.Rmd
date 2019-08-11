@@ -1,0 +1,243 @@
+---
+title: "CSDA1050 Capstone Project  Sprint2"
+author: "Eugene Yong Geun Park"
+date: '2019-08-13'
+output:
+  html_document: default
+  word_document: default
+  pdf_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+### Continuing from Sprint1, now predictive models are being built using refined dataset. 
+
+## ML Modelling
+### Applying various ML techniques to create models which can provide insights. Starting with classification models as employees are to be classified as Active, Quit, and Terminated status. However, the focus is not just in classification. Other methods and models will be applied as necessary. 
+
+```{r}
+library(dplyr)
+```
+
+
+```{r}
+#importing the original file. Feature engineering that was perfored in Sprint1 is replicated for Sprint2 modelling. 
+hr<-read.csv("~/Desktop/CSDA-1050F18S1/eugenepark/CSDA1050HR.csv")
+hdate <- as.character(hr$Hire)
+tdate <- as.character(hr$Termination)
+bdate <- as.character(hr$DOB)
+hr$hdate = as.Date(hdate, format="%Y%m%d")
+hr$tdate = as.Date(tdate, format="%Y%m%d")
+hr$bdate = as.Date(bdate, format="%Y%m%d")
+hr$hireage <- as.integer(round((hr$hdate-hr$bdate)/365, digit=0))
+hr$termage <- as.integer(round((hr$tdate-hr$bdate)/365, digit=0))
+hr$current <-as.Date(Sys.Date())
+hr$tenure <- ifelse(is.na(hr$termage), as.integer(round((hr$current-hr$hdate)/365, digit=0))
+                    ,as.integer(round((hr$tdate-hr$hdate)/365, digit=0)))
+```
+
+##Decision Tree1:
+###Starting it off with a Decision Tree model. Prior to creating a model, I am subsetting the dataset into Train(80%) & Test(20%). For now, I am fitting in all variables that were explored in Sprint1. 
+```{r}
+library(caTools)
+#Employees' whose TermType is blank, filling them in as "Active" so modelling can go smoothly. 
+levels(hr$TermType)[1] <-"Active"
+hrmodel <- select(hr, C.LEVEL, Team, Job.Level, Team, Raise, Education, DistToWork, TermType, hireage, termage, tenure)
+str(hrmodel)
+set.seed(100)
+sample <- sample.split(hrmodel, SplitRatio = 0.8)
+train <- subset(hrmodel, sample==TRUE)
+test <- subset(hrmodel, sample==FALSE)
+
+```
+
+```{r}
+prop.table((table(train$TermType)))
+```
+```{r}
+prop.table((table(test$TermType)))
+```
+
+###Noting that this tree isn't classifying any of "Active" employees here. 
+```{r}
+library(rpart)
+library(tree)
+library(rpart.plot)
+fit <- rpart(TermType~., data=train)
+rpart.plot(fit)
+
+```
+
+```{r}
+summary(fit)
+```
+
+###Checking the overall accuracy of the model. 53% overall accuracy is not reliable. 
+```{r}
+library(caret)
+predict <- predict(fit, test, type='class')
+confusionMatrix(predict, test$TermType)
+```
+
+##Decision Tree2:
+###Using Sprint1's insight, starting to explore variables that seemed more relevant than previous attempt. 
+
+###As a result, visually, this tree has been able to classify all three statuses of employees: "Active", "Quit", and "Terminated", while previous model failed to. 
+
+###However, overall accuracy and reliability have worsened. 
+```{r}
+#Chosen variables are tenure, Raise and termage.
+hrmodel2 <- select(hr, TermType, tenure, Raise, termage)
+set.seed(102)
+sample2 <- sample.split(hrmodel2, SplitRatio = 0.8)
+train2 <- subset(hrmodel2, sample==TRUE)
+test2 <- subset(hrmodel2, sample==FALSE)
+fit2 <- rpart(TermType~.,data=train2)
+rpart.plot(fit2)
+predict2 <- predict(fit2, test2, type='class')
+confusionMatrix(predict2, test2$TermType)
+```
+
+
+##Decision Tree3:
+###After numerous attempts of combining what seemed to be significant factors from Data Exploration, below tree is a model that gives higher accuracy (57%) than previous ones. Again, this can not be considered as a reliable model but it shares some insight. 
+
+###Associate & Supervisor are relatively junior positions and the organization is not doing a good job retaining them as majority of them leaves voluntarily. On the other hand, employees who are not "associate" or "supervisor"" can be considered as more senior positions and they face more frequent cases of termination. 
+
+###When drilled down deeper, among Associates & Supervisors, employees in Account, Corporate, Creative and Planning departments, tend to leave more voluntarily, which leaves Production department that has less portion of quitting. This makes sense because first mentioned 4 divisions are more Advertising specific roles which are sought after and more actively recruited. Production department's role and scope do not tend to change from one company to another, which leads to less active recruitment. 
+###And for senior positions, the tree indicates that tenure is one of significant factors, which also is logical. In company's perspective, Senior position is a bigger investment. Their value and/or ROI is more closely monitored and retention decisions will have to be made timely for financial reasons. 
+
+
+```{r}
+hrmodel3 <- select(hr, TermType, tenure, Team, Job.Level)
+set.seed(104)
+sample3 <- sample.split(hrmodel3, SplitRatio = 0.8)
+train3 <- subset(hrmodel3, sample==TRUE)
+test3 <- subset(hrmodel3, sample==FALSE)
+fit3 <- rpart(TermType~.,data=train3)
+rpart.plot(fit3)
+predict3 <- predict(fit3, test3, type='class')
+confusionMatrix(predict3, test3$TermType)
+```
+
+
+##Random Forest1:
+###Trying a Random Forest model, using the same dataset(variables) from Decision Tree 3 as it had given the highest accuracy so far. Unfortunately, the result does not seem to provide any improvement in accuracy. 
+```{r}
+library(randomForest)
+set.seed(47)
+rfmodel3 <- randomForest(TermType ~., data=train3, proximity=TRUE)
+rfmodel3
+rfpredict3 <- predict(rfmodel3, test3, type='class')
+confusionMatrix(rfpredict3, test3$TermType)
+```
+
+
+##Decision Tree4:
+###Although I start to realize that size of my dataset sets limit to building a reliable model, I start to wonder if classifying "Active" employee is actually adding value to this analysis. Perhaps, the analysis should focus on characterstics of "Quit" employees and "Terminated" employees. Then the discovery can be applied to "Active" employees for operational action plan. In addition, removing a classification with smallest data size and least accurary (Again, "Active" status) from confusion matrix might reveal how this model can truly perform classifying "Quit" and "Terminated" status.  
+
+###This is the same dataset used in very first Decision Tree1 and by excluding "Active" status from the dataset, the accuracy has improved from 53% to 63%.
+
+```{r}
+newhrmodel<-hrmodel[!(hrmodel$TermType=="Active"),]
+set.seed(111)
+newsample <- sample.split(newhrmodel, SplitRatio = 0.8)
+newtrain <- subset(newhrmodel, sample==TRUE)
+newtest <- subset(newhrmodel, sample==FALSE)
+newfit <- rpart(TermType~.,data=newtrain)
+rpart.plot(newfit)
+newpredict <- predict(newfit, newtest, type='class')
+confusionMatrix(newpredict, newtest$TermType)
+```
+
+##Decision Tree5:
+###This now tests the Decision tree3 which had 57% accuracy. And excluding "Active" status has improved the model to 68%. 
+```{r}
+newhrmodel3<-hrmodel3[!(hrmodel3$TermType=="Active"),]
+set.seed(113)
+newsample3 <- sample.split(newhrmodel3, SplitRatio = 0.8)
+newtrain3 <- subset(newhrmodel3, sample==TRUE)
+newtest3 <- subset(newhrmodel3, sample==FALSE)
+newfit3 <- rpart(TermType~.,data=newtrain3)
+rpart.plot(newfit3)
+newpredict3 <- predict(newfit3, newtest3, type='class')
+confusionMatrix(newpredict3, newtest3$TermType)
+```
+
+###Although there is a small improvement in Decision Tree model, it is concluded that a reliable classification model can not be built based on this dataset. I have decided to look into correlation between some hiring data and annual revenue, using linear regression.
+
+```{r}
+#When new hires are made using recruiting firm, 22% of new hire's salary is paid as commission. I am making a new column that illustrates commission paid to recruting firm for each hire.
+hr$hirecost <- hr$BEGIN.SALARY * 0.22
+#Now by aggregating hirecost by year, I get aggregated yearly total. 
+hirecost <- hr %>% group_by(H.Year) %>% summarise_each(funs(sum), hirecost)
+#An aggregation of total count of hires by year. 
+hirecount <- hr %>% count(H.Year)
+#hirecost and hirecount are now being combined into a new dataset. 
+colnames(hirecost) <- c("year", "hirecost")
+colnames(hirecount) <- c("year", "hirecount")
+hire <- merge(hirecost, hirecount, KEY="year")
+#Excluding 2019 row as the data is still subject to change. 
+hire <- hire[-c(10),]
+#Adding revenue data manually for each year. 
+hire$rev <- c(3908146, 4509822, 3907264, 4277165, 5127230, 5571537, 5371010, 5671345, 6196730, 5980433, 5272719, 5017569, 5090057)
+#A small clean up of dataset. Reducting numeric figures to thousands, then adding average cost per hire column. 
+hire$hirecost <-as.integer(hire$hirecost/1000)
+hire$avgcost <- as.integer(hire$hirecost/hire$hirecount)
+hire$rev <-as.integer(hire$rev/1000)
+
+hire
+```
+
+##Linear Regression1:
+###Plotting hirecost and revenue together to check its correlation visually. Although it is a very small # of observations, there's a correlation. 
+```{r}
+library(ggplot2)
+ggplot(hire, aes(x=hirecost, y=rev)) + geom_point() +geom_smooth(method='lm')+ scale_x_continuous(labels = scales::comma)
+
+```
+
+###Running a linear regression model to find out its coefficients. 
+```{r}
+lm1 <- lm(hirecost ~ rev, data = hire)
+summary(lm1)
+```
+
+###From 2018's 5090K revenue figure, if the organization is targetting 500K revenue growth year-over-year, below are hiring costs predicted using current model. 183K, 241K, 300K, & 358K in order. 
+```{r}
+predict(lm1, newdata = data.frame((rev = c(5500, 6000, 6500, 7000))))
+```
+
+##Linear Regression2:
+###Now plotting # of hires and revenue together. 
+```{r}
+ggplot(hire, aes(x=hirecount, y=rev)) + geom_point() +geom_smooth(method='lm')+ scale_x_continuous(labels = scales::comma)
+```
+
+###A linear model between # of hires & revenue. A correlation can be observed again. 
+```{r}
+lm2 <- lm(hirecount ~ rev, data = hire)
+summary(lm2)
+```
+
+###When the same 500K year-over-year revenue growth is applied, the model suggests below # of new hires prediction. 
+```{r}
+predict(lm2, newdata = data.frame((rev = c(5500, 6000, 6500, 7000))))
+```
+
+###Overall, this linear model analysis suggests that predicted hiring cost can be considered as opportunity cost to retain existing staff. The amounts are not insignificant. I feel that they are meaningful enough to actually propose solid career advancement & growth opportunity to individuals at risk, in a form of education and/or training. 
+```{r}
+predict(lm1, newdata = data.frame((rev = c(5500, 6000, 6500, 7000))))
+predict(lm2, newdata = data.frame((rev = c(5500, 6000, 6500, 7000))))
+```
+
+##Conclusion
+###Sprint2 analysis has started off with classification models such as Decision Tree and Random Forest. Although I was successful in increasing accuracy slightly, the overall performance was not satisfactory. Perhaps the failure was foreseen, given the limitation from small dataset. This does not mean that this analysis did not share any insights. As it was shown Data Exploration phase, this modelling has illustrated that more junior staff chooses to quit and more senior staff are terminated from the organization. Also bigger percentage in termination of senior staff hints that the organization tends to scrutinize senior staff's performance. Another discovery is that there is correlation between revenue and hiring cost. While it seemed obvious that hiring cost increase as revenue increases, it is very meaningful to quantify hiring cost in different business situations so it can help build budget for employee retention purpose. 
+
+##Next step
+###Discoveries from sprint 1 and 2 will be put into a report for stakeholders. The goal is to create a report that insightful and beneficial to related party who are not necessarily familiar with machine learning. 
+
+
