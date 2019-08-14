@@ -197,16 +197,16 @@ $(document).ready(function () {
 </div>
 
 
-<div id="background" class="section level2">
-<h2>Background</h2>
-<div id="continuing-from-sprint1-now-predictive-models-are-being-built-using-refined-dataset." class="section level3">
-<h3>Continuing from Sprint1, now predictive models are being built using refined dataset.</h3>
+<div id="background" class="section level1">
+<h1>Background</h1>
+<div id="continuing-from-sprint1-predictive-models-are-being-built-using-refined-dataset." class="section level3">
+<h3>Continuing from Sprint1, predictive models are being built using refined dataset.</h3>
 </div>
 </div>
-<div id="ml-modelling" class="section level2">
-<h2>ML Modelling</h2>
-<div id="applying-various-ml-techniques-to-create-models-which-can-provide-insights.-starting-with-classification-models-as-employees-are-to-be-classified-as-active-quit-and-terminated-status.-however-the-focus-is-not-just-in-classification.-other-methods-and-models-will-be-applied-as-necessary." class="section level3">
-<h3>Applying various ML techniques to create models which can provide insights. Starting with classification models as employees are to be classified as Active, Quit, and Terminated status. However, the focus is not just in classification. Other methods and models will be applied as necessary.</h3>
+<div id="ml-modelling" class="section level1">
+<h1>ML Modelling</h1>
+<div id="applying-various-ml-techniques-to-create-models-which-can-discover-factors-that-influence-employee-retention.-starting-with-classification-models-as-employees-are-to-be-classified-as-active-quit-and-terminated-status.-in-addition-other-methods-and-models-will-be-applied-as-necessary-to-discover-other-insights." class="section level3">
+<h3>Applying various ML techniques to create models which can discover factors that influence employee retention. Starting with classification models as employees are to be classified as Active, Quit, and Terminated status. In addition, other methods and models will be applied as necessary to discover other insights.</h3>
 <pre class="r"><code>library(dplyr)</code></pre>
 <pre><code>## Warning: package 'dplyr' was built under R version 3.5.2</code></pre>
 <pre><code>## 
@@ -231,11 +231,11 @@ hr$current &lt;-as.Date(Sys.Date())
 hr$tenure &lt;- ifelse(is.na(hr$termage), as.integer(round((hr$current-hr$hdate)/365, digit=0))
                     ,as.integer(round((hr$tdate-hr$hdate)/365, digit=0)))</code></pre>
 </div>
+<div id="decision-tree-1" class="section level2">
+<h2>Decision Tree 1:</h2>
 </div>
-<div id="decision-tree1" class="section level2">
-<h2>Decision Tree1:</h2>
-<div id="starting-it-off-with-a-decision-tree-model.-prior-to-creating-a-model-i-am-subsetting-the-dataset-into-train80-test20.-for-now-i-am-fitting-in-all-variables-that-were-explored-in-sprint1." class="section level3">
-<h3>Starting it off with a Decision Tree model. Prior to creating a model, I am subsetting the dataset into Train(80%) &amp; Test(20%). For now, I am fitting in all variables that were explored in Sprint1.</h3>
+<div id="starting-it-off-with-a-decision-tree-model-which-incorporates-all-variables-from-sprint1.-prior-to-creating-a-model-i-am-subsetting-the-dataset-into-train80-test20.-for-now-i-am-fitting-in-all-variables-that-were-explored-in-sprint1." class="section level2">
+<h2>Starting it off with a Decision Tree model which incorporates all variables from Sprint1. Prior to creating a model, I am subsetting the dataset into Train(80%) &amp; Test(20%). For now, I am fitting in all variables that were explored in Sprint1.</h2>
 <pre class="r"><code>library(caTools)</code></pre>
 <pre><code>## Warning: package 'caTools' was built under R version 3.5.2</code></pre>
 <pre class="r"><code>#Employees' whose TermType is blank, filling them in as &quot;Active&quot; so modelling can go smoothly. 
@@ -265,7 +265,6 @@ test &lt;- subset(hrmodel, sample==FALSE)</code></pre>
 <pre><code>## 
 ##     Active       Quit Terminated 
 ##  0.1538462  0.6153846  0.2307692</code></pre>
-</div>
 <div id="noting-that-this-tree-isnt-classifying-any-of-active-employees-here." class="section level3">
 <h3>Noting that this tree isn’t classifying any of “Active” employees here.</h3>
 <pre class="r"><code>library(rpart)</code></pre>
@@ -360,8 +359,8 @@ rpart.plot(fit)</code></pre>
 ##     class counts:     1     3    12
 ##    probabilities: 0.062 0.188 0.750</code></pre>
 </div>
-<div id="checking-the-overall-accuracy-of-the-model.-53-overall-accuracy-is-not-reliable." class="section level3">
-<h3>Checking the overall accuracy of the model. 53% overall accuracy is not reliable.</h3>
+<div id="checking-the-overall-accuracy-of-the-model.-53-can-not-be-considered-reliable." class="section level3">
+<h3>Checking the overall accuracy of the model. 53% can not be considered reliable.</h3>
 <pre class="r"><code>library(caret)</code></pre>
 <pre><code>## Warning: package 'caret' was built under R version 3.5.2</code></pre>
 <pre><code>## Loading required package: lattice</code></pre>
@@ -401,16 +400,10 @@ confusionMatrix(predict, test$TermType)</code></pre>
 ## Balanced Accuracy           0.5000      0.4875            0.4250</code></pre>
 </div>
 </div>
-<div id="decision-tree2" class="section level2">
-<h2>Decision Tree2:</h2>
-<div id="using-sprint1s-insight-starting-to-explore-variables-that-seemed-more-relevant-than-previous-attempt." class="section level3">
-<h3>Using Sprint1’s insight, starting to explore variables that seemed more relevant than previous attempt.</h3>
-</div>
-<div id="as-a-result-visually-this-tree-has-been-able-to-classify-all-three-statuses-of-employees-active-quit-and-terminated-while-previous-model-failed-to." class="section level3">
-<h3>As a result, visually, this tree has been able to classify all three statuses of employees: “Active”, “Quit”, and “Terminated”, while previous model failed to.</h3>
-</div>
-<div id="however-overall-accuracy-and-reliability-have-worsened." class="section level3">
-<h3>However, overall accuracy and reliability have worsened.</h3>
+<div id="decision-tree-2" class="section level2">
+<h2>Decision Tree 2:</h2>
+<div id="starting-to-explore-variables-that-seemed-more-relevant-than-previous-attempt.-as-a-result-visually-this-tree-has-been-able-to-classify-all-three-statuses-of-employees-active-quit-and-terminated-while-previous-model-failed-does-not.-however-overall-accuracy-and-reliability-have-worsened-46." class="section level3">
+<h3>Starting to explore variables that seemed more relevant than previous attempt. As a result, visually, this tree has been able to classify all three statuses of employees: “Active”, “Quit”, and “Terminated”, while previous model failed does not. However, overall accuracy and reliability have worsened (46%).</h3>
 <pre class="r"><code>#Chosen variables are tenure, Raise and termage.
 hrmodel2 &lt;- select(hr, TermType, tenure, Raise, termage)
 set.seed(102)
@@ -454,8 +447,8 @@ confusionMatrix(predict2, test2$TermType)</code></pre>
 ## Balanced Accuracy           0.5000      0.3750            0.4000</code></pre>
 </div>
 </div>
-<div id="decision-tree3" class="section level2">
-<h2>Decision Tree3:</h2>
+<div id="decision-tree-3" class="section level2">
+<h2>Decision Tree 3:</h2>
 <div id="after-numerous-attempts-of-combining-what-seemed-to-be-significant-factors-from-data-exploration-below-tree-is-a-model-that-gives-higher-accuracy-57-than-previous-ones.-again-this-can-not-be-considered-as-a-reliable-model-but-it-shares-some-insight." class="section level3">
 <h3>After numerous attempts of combining what seemed to be significant factors from Data Exploration, below tree is a model that gives higher accuracy (57%) than previous ones. Again, this can not be considered as a reliable model but it shares some insight.</h3>
 </div>
@@ -509,8 +502,8 @@ confusionMatrix(predict3, test3$TermType)</code></pre>
 ## Balanced Accuracy           0.5000      0.5062           0.59167</code></pre>
 </div>
 </div>
-<div id="random-forest1" class="section level2">
-<h2>Random Forest1:</h2>
+<div id="random-forest-1" class="section level2">
+<h2>Random Forest 1:</h2>
 <div id="trying-a-random-forest-model-using-the-same-datasetvariables-from-decision-tree-3-as-it-had-given-the-highest-accuracy-so-far.-unfortunately-the-result-does-not-seem-to-provide-any-improvement-in-accuracy." class="section level3">
 <h3>Trying a Random Forest model, using the same dataset(variables) from Decision Tree 3 as it had given the highest accuracy so far. Unfortunately, the result does not seem to provide any improvement in accuracy.</h3>
 <pre class="r"><code>library(randomForest)</code></pre>
@@ -574,8 +567,8 @@ confusionMatrix(rfpredict3, test3$TermType)</code></pre>
 ## Balanced Accuracy          0.47727      0.4875           0.55833</code></pre>
 </div>
 </div>
-<div id="decision-tree4" class="section level2">
-<h2>Decision Tree4:</h2>
+<div id="decision-tree-4" class="section level2">
+<h2>Decision Tree 4:</h2>
 <div id="although-i-start-to-realize-that-size-of-my-dataset-sets-limit-to-building-a-reliable-model-i-start-to-wonder-if-classifying-active-employee-is-actually-adding-value-to-this-analysis.-perhaps-the-analysis-should-focus-on-characterstics-of-quit-employees-and-terminated-employees.-then-the-discovery-can-be-applied-to-active-employees-for-operational-action-plan.-in-addition-removing-a-classification-with-smallest-data-size-and-least-accurary-again-active-status-from-confusion-matrix-might-reveal-how-this-model-can-truly-perform-classifying-quit-and-terminated-status." class="section level3">
 <h3>Although I start to realize that size of my dataset sets limit to building a reliable model, I start to wonder if classifying “Active” employee is actually adding value to this analysis. Perhaps, the analysis should focus on characterstics of “Quit” employees and “Terminated” employees. Then the discovery can be applied to “Active” employees for operational action plan. In addition, removing a classification with smallest data size and least accurary (Again, “Active” status) from confusion matrix might reveal how this model can truly perform classifying “Quit” and “Terminated” status.</h3>
 </div>
@@ -623,8 +616,8 @@ confusionMatrix(newpredict, newtest$TermType)</code></pre>
 ## Balanced Accuracy               NA      0.5417           0.54167</code></pre>
 </div>
 </div>
-<div id="decision-tree5" class="section level2">
-<h2>Decision Tree5:</h2>
+<div id="decision-tree-5" class="section level2">
+<h2>Decision Tree 5:</h2>
 <div id="this-now-tests-the-decision-tree3-which-had-57-accuracy.-and-excluding-active-status-has-improved-the-model-to-68." class="section level3">
 <h3>This now tests the Decision tree3 which had 57% accuracy. And excluding “Active” status has improved the model to 68%.</h3>
 <pre class="r"><code>newhrmodel3&lt;-hrmodel3[!(hrmodel3$TermType==&quot;Active&quot;),]
@@ -668,8 +661,11 @@ confusionMatrix(newpredict3, newtest3$TermType)</code></pre>
 ## Detection Prevalence             0      0.6818            0.3182
 ## Balanced Accuracy               NA      0.6250            0.6250</code></pre>
 </div>
-<div id="although-there-is-a-small-improvement-in-decision-tree-model-it-is-concluded-that-a-reliable-classification-model-can-not-be-built-based-on-this-dataset.-i-have-decided-to-look-into-correlation-between-some-hiring-data-and-annual-revenue-using-linear-regression." class="section level3">
-<h3>Although there is a small improvement in Decision Tree model, it is concluded that a reliable classification model can not be built based on this dataset. I have decided to look into correlation between some hiring data and annual revenue, using linear regression.</h3>
+<div id="although-there-is-a-small-improvement-in-accuracy-in-decision-tree-models-it-is-concluded-that-a-reliable-classification-model-can-not-be-built-based-on-this-dataset.-i-have-decided-to-look-into-correlation-between-hiring-data-and-annual-revenue-using-linear-regression." class="section level3">
+<h3>Although there is a small improvement in accuracy in Decision Tree models, it is concluded that a reliable classification model can not be built based on this dataset. I have decided to look into correlation between hiring data and annual revenue, using linear regression.</h3>
+</div>
+<div id="starting-with-modifications-in-dataset." class="section level3">
+<h3>Starting with modifications in dataset.</h3>
 <pre class="r"><code>#When new hires are made using recruiting firm, 22% of new hire's salary is paid as commission. I am making a new column that illustrates commission paid to recruting firm for each hire.
 hr$hirecost &lt;- hr$BEGIN.SALARY * 0.22
 #Now by aggregating hirecost by year, I get aggregated yearly total. 
@@ -697,7 +693,6 @@ hire$rev &lt;- c(3908146, 4509822, 3907264, 4277165, 5127230, 5571537, 5371010, 
 hire$hirecost &lt;-as.integer(hire$hirecost/1000)
 hire$avgcost &lt;- as.integer(hire$hirecost/hire$hirecount)
 hire$rev &lt;-as.integer(hire$rev/1000)
-
 hire</code></pre>
 <pre><code>##    year hirecost hirecount  rev avgcost
 ## 1  2006       36         2 3908      18
@@ -715,8 +710,8 @@ hire</code></pre>
 ## 14 2019       28         2 5090      14</code></pre>
 </div>
 </div>
-<div id="linear-regression1" class="section level2">
-<h2>Linear Regression1:</h2>
+<div id="linear-regression-1" class="section level2">
+<h2>Linear Regression 1:</h2>
 <div id="plotting-hirecost-and-revenue-together-to-check-its-correlation-visually.-although-it-is-a-very-small-of-observations-theres-a-correlation." class="section level3">
 <h3>Plotting hirecost and revenue together to check its correlation visually. Although it is a very small # of observations, there’s a correlation.</h3>
 <pre class="r"><code>library(ggplot2)
@@ -809,6 +804,7 @@ summary(lm2)</code></pre>
 <h2>Next step</h2>
 <div id="discoveries-from-sprint-1-and-2-will-be-put-into-a-report-for-stakeholders.-the-goal-is-to-create-a-report-that-insightful-and-beneficial-to-related-party-who-are-not-necessarily-familiar-with-machine-learning." class="section level3">
 <h3>Discoveries from sprint 1 and 2 will be put into a report for stakeholders. The goal is to create a report that insightful and beneficial to related party who are not necessarily familiar with machine learning.</h3>
+</div>
 </div>
 </div>
 

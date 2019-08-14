@@ -3,8 +3,8 @@ title: "CSDA1050 Capstone Project"
 author: "Eugene Yong Geun Park"
 date: '2019-07-17'
 output:
-  word_document: default
   pdf_document: default
+  word_document: default
   html_document: default
 ---
 
