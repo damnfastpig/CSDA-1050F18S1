@@ -3,9 +3,11 @@ title: "CSDA1050 Capstone Project"
 author: "Eugene Yong Geun Park"
 date: '2019-07-17'
 output:
-  pdf_document: default
-  word_document: default
   html_document: default
+  word_document: default
+  pdf_document: default
+editor_options: 
+  chunk_output_type: inline
 ---
 
 ```{r setup, include=FALSE}
@@ -33,6 +35,10 @@ hr<-read.csv("~/Desktop/CSDA-1050F18S1/eugenepark/CSDA1050HR.csv")
 
 
 ```{r}
+head(hr)
+```
+
+```{r}
 #Examine the HR dataset
 #S.EMP. - A unique employee number assigned to each employee
 #C.LEVEL - Employee's job level ranging from C1 being lowest & C6 highest
@@ -57,7 +63,7 @@ str(hr)
 #Please note that I am using Plotly library to take advantage of its interactive functionality (i.e. hover-over data display, etc)
 #While each level can be considered as 2-3 years experience accumulatively, C2 & C3 level seem to be harder to be retained (most "Quit"" job levels)
 #Among employees terminated, again C2 & C3 level take up more than 50%. I also think it's interesting that C5 level takes sizable portion in "terminated" group.
-a<-ggplot(hr, aes(x=TermType, fill=C.LEVEL))+
+a<-ggplot(hr, aes(x=TermType, fill=Job.Level))+
   geom_bar()
 ggplotly(a)
 ```
@@ -196,7 +202,7 @@ ggplotly(p)
 
 ```{r}
 #Exploring HighCharter library for better visualization of analysis, in additioned to enhanced information delivery. 
-plot_ly(hr, y=hr$tenure, color=hr$Team, type="box")
+plot_ly(hr, y=hr$tenure, color=hr$Education, type="box")
 
 ```
 
